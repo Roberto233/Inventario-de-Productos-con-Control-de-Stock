@@ -2,11 +2,23 @@ const Producto = require('../models/producto.model');
 
 exports.crear = async (req, res) => {
   try {
+    const { nombre, categoria, precio, stock } = req.body;
+
+    if (precio < 0 || stock < 0) {
+      return res.status(400).json({ error: 'El precio o stock no puede ser negativo.' });
+    }
+
+    const existente = await Producto.findOne({ nombre, categoria });
+    if (existente) {
+      return res.status(400).json({ error: 'Ya existe un producto con ese nombre y categoría.' });
+    }
+
     const nuevo = new Producto(req.body);
     const guardado = await nuevo.save();
-    res.status(201).json(guardado);
+    res.status(201).json({ mensaje: 'Producto agregado exitosamente', producto: guardado });
+
   } catch (err) {
-    res.status(400).json({ error: 'Error al crear producto', detalle: err.message });
+    res.status(500).json({ error: 'Error al crear producto', detalle: err.message });
   }
 };
 

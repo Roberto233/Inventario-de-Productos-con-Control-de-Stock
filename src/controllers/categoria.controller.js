@@ -2,11 +2,17 @@ const Categoria = require('../models/categoria.model');
 
 exports.crear = async (req, res) => {
   try {
+    const existente = await Categoria.findOne({ nombre: req.body.nombre });
+    if (existente) {
+      return res.status(400).json({ error: 'Ya existe una categoría con ese nombre.' });
+    }
+
     const nueva = new Categoria(req.body);
     const guardada = await nueva.save();
-    res.status(201).json(guardada);
+    res.status(201).json({ mensaje: 'Categoría creada correctamente', categoria: guardada });
+
   } catch (err) {
-    res.status(400).json({ error: 'Error al crear categoría', detalle: err.message });
+    res.status(500).json({ error: 'Error al crear categoría', detalle: err.message });
   }
 };
 
